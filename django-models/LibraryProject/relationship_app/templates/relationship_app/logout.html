@@ -1,0 +1,82 @@
+<!-- logout.html -->
+<!--
+BEGINNER EXPLANATION:
+- This template shows a confirmation that the user has been logged out
+- It provides links to log back in or continue browsing
+- Django automatically clears the user's session when they logout
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logged Out - Library System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .auth-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .message {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        .links {
+            margin-top: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <h1>👋 You have been logged out</h1>
+        
+        <div class="message">
+            <p>Thank you for using the Library System!</p>
+            <p>Your session has been safely terminated.</p>
+        </div>
+        
+        <!-- Navigation Links -->
+        <div class="links">
+            <a href="{% url 'relationship_app:login' %}" class="btn">Login Again</a>
+            <a href="{% url 'relationship_app:list_books' %}" class="btn btn-secondary">Browse Books</a>
+        </div>
+        
+        <div style="margin-top: 30px; font-size: 14px; color: #888;">
+            <p>💡 Tip: You can still browse books without logging in!</p>
+        </div>
+    </div>
+</body>
+</html>

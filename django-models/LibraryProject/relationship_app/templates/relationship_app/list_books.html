@@ -39,8 +39,19 @@ BEGINNER EXPLANATION:
     
     <!-- Navigation links -->
     <hr>
-    <p>
-        <a href="{% url 'admin:index' %}">Admin Panel</a>
-    </p>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <a href="{% url 'admin:index' %}">Admin Panel</a>
+        </div>
+        <div>
+            {% if user.is_authenticated %}
+                <span>Welcome, {{ user.username }}!</span> |
+                <a href="{% url 'relationship_app:logout' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'relationship_app:login' %}">Login</a> |
+                <a href="{% url 'relationship_app:register' %}">Register</a>
+            {% endif %}
+        </div>
+    </div>
 </body>
 </html>

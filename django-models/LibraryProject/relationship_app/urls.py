@@ -26,6 +26,16 @@ urlpatterns = [
     # <int:pk> means capture an integer and pass it as 'pk' parameter
     # pk = primary key (the ID of the library)
     path('library/<int:pk>/', views.LibraryDetailView.as_view(), name='library_detail'),
+    
+    # Authentication URLs
+    # URL: /login/ - User login page
+    path('login/', views.CustomLoginView.as_view(), name='login'),
+    
+    # URL: /logout/ - User logout page
+    path('logout/', views.CustomLogoutView.as_view(), name='logout'),
+    
+    # URL: /register/ - User registration page
+    path('register/', views.register, name='register'),
 ]
 
 """

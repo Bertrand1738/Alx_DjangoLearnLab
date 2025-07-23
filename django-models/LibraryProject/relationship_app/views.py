@@ -1,6 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic.detail import DetailView
 from django.views.generic import ListView
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.views import LoginView, LogoutView
 from .models import Book
 from .models import Library
 
@@ -69,3 +72,71 @@ class LibraryDetailView(DetailView):
         # For example: context['extra_info'] = 'Some extra information'
         
         return context
+
+
+# =============================================================================
+# USER AUTHENTICATION VIEWS
+# =============================================================================
+
+def register(request):
+    """
+    Function-based view for user registration.
+    
+    BEGINNER EXPLANATION:
+    - This view handles user registration (creating new accounts)
+    - GET request: Shows the registration form
+    - POST request: Processes the form and creates a new user
+    - UserCreationForm is Django's built-in registration form
+    - After successful registration, user is automatically logged in
+    """
+    if request.method == 'POST':
+        # User submitted the registration form
+        form = UserCreationForm(request.POST)
+        
+        if form.is_valid():
+            # Form data is valid, create the user
+            user = form.save()
+            
+            # Automatically log in the newly registered user
+            login(request, user)
+            
+            # Redirect to a success page (you can change this URL)
+            return redirect('relationship_app:list_books')
+    else:
+        # GET request: Show empty registration form
+        form = UserCreationForm()
+    
+    # Render the registration template with the form
+    return render(request, 'relationship_app/register.html', {'form': form})
+
+
+class CustomLoginView(LoginView):
+    """
+    Class-based view for user login.
+    
+    BEGINNER EXPLANATION:
+    - This inherits from Django's built-in LoginView
+    - LoginView handles all the login logic for us
+    - We just need to specify which template to use
+    - Django automatically handles form validation and user authentication
+    """
+    template_name = 'relationship_app/login.html'
+    redirect_authenticated_user = True
+    
+    def get_success_url(self):
+        """
+        Where to redirect after successful login.
+        """
+        return '/relationship_app/books/'
+
+
+class CustomLogoutView(LogoutView):
+    """
+    Class-based view for user logout.
+    
+    BEGINNER EXPLANATION:
+    - This inherits from Django's built-in LogoutView
+    - LogoutView handles clearing the user's session
+    - We just specify which template to show after logout
+    """
+    template_name = 'relationship_app/logout.html'

@@ -37,6 +37,16 @@ urlpatterns = [
     
     # URL: /register/ - User registration page
     path('register/', views.register, name='register'),
+    
+    # Role-based access control URLs
+    # URL: /admin_view/ - Admin-only page
+    path('admin_view/', views.admin_view, name='admin_view'),
+    
+    # URL: /librarian_view/ - Librarian-only page  
+    path('librarian_view/', views.librarian_view, name='librarian_view'),
+    
+    # URL: /member_view/ - Member-only page
+    path('member_view/', views.member_view, name='member_view'),
 ]
 
 """

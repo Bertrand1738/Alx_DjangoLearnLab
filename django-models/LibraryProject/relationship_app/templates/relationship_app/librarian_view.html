@@ -1,0 +1,131 @@
+<!-- librarian_view.html -->
+<!--
+BEGINNER EXPLANATION:
+- This template is only accessible to users with 'Librarian' role
+- Shows book management tools and library operations
+- Librarians can manage books but not system settings
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Librarian Dashboard - Library System</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            background-color: #f8f9fa;
+        }
+        .librarian-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 5px solid #007bff;
+        }
+        h1 { 
+            color: #007bff; 
+            margin-bottom: 20px;
+        }
+        .role-badge {
+            background-color: #007bff;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .librarian-tools {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .tool-link {
+            display: inline-block;
+            margin: 5px 10px 5px 0;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .tool-link:hover {
+            background-color: #0056b3;
+            color: white;
+        }
+        .books-section {
+            margin: 20px 0;
+        }
+        .book-item {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #e9ecef;
+            border-radius: 4px;
+        }
+        .book-title {
+            font-weight: bold;
+            color: #333;
+        }
+        .book-author {
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="librarian-container">
+        <h1>📚 Librarian Dashboard</h1>
+        
+        <p>
+            <span class="role-badge">{{ user_role }}</span>
+            Welcome, {{ user.username }}! You can manage library operations.
+        </p>
+        
+        <div class="librarian-tools">
+            <h3>Library Management Tools</h3>
+            <a href="{% url 'relationship_app:list_books' %}" class="tool-link">View All Books</a>
+            <a href="#" class="tool-link">Add New Book</a>
+            <a href="#" class="tool-link">Manage Authors</a>
+            <a href="#" class="tool-link">Library Statistics</a>
+            <a href="#" class="tool-link">Member Reports</a>
+        </div>
+        
+        <div class="books-section">
+            <h3>📖 Recent Books</h3>
+            {% if books %}
+                {% for book in books %}
+                    <div class="book-item">
+                        <div class="book-title">{{ book.title }}</div>
+                        <div class="book-author">by {{ book.author.name }}</div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No books available in the system.</p>
+            {% endif %}
+        </div>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ccc;">
+            <h4>📋 Access Level: Librarian</h4>
+            <ul>
+                <li>✅ Book management</li>
+                <li>✅ Author management</li>
+                <li>✅ Member assistance</li>
+                <li>✅ Library statistics</li>
+                <li>❌ System administration</li>
+                <li>❌ User role management</li>
+            </ul>
+        </div>
+        
+        <!-- Navigation -->
+        <div style="margin-top: 30px; text-align: center;">
+            <p>
+                <a href="{% url 'relationship_app:list_books' %}">← Back to Books</a> |
+                <a href="{% url 'relationship_app:logout' %}">Logout</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

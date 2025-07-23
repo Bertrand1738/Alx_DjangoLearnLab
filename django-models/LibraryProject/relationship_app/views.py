@@ -4,8 +4,8 @@ from django.views.generic import ListView
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import LoginView, LogoutView
-from .models import Book
-from .models import Library
+from django.contrib.auth.decorators import user_passes_test
+from .models import Book, Library
 
 # Create your views here.
 
@@ -154,3 +154,85 @@ class CustomLogoutView(LogoutView):
     - We just specify which template to show after logout
     """
     template_name = 'relationship_app/logout.html'
+
+
+# =============================================================================
+# ROLE-BASED ACCESS CONTROL VIEWS
+# =============================================================================
+
+def check_role(user, role):
+    """
+    Helper function to check if user has a specific role.
+    
+    BEGINNER EXPLANATION:
+    - This function checks if a user has the required role
+    - Returns True if user has the role, False otherwise
+    - Used by the @user_passes_test decorator below
+    """
+    return hasattr(user, 'userprofile') and user.userprofile.role == role
+
+
+# Role checking functions for decorators
+def is_admin(user):
+    """Check if user has Admin role"""
+    return check_role(user, 'Admin')
+
+
+def is_librarian(user):
+    """Check if user has Librarian role"""
+    return check_role(user, 'Librarian')
+
+
+def is_member(user):
+    """Check if user has Member role"""
+    return check_role(user, 'Member')
+
+
+@user_passes_test(is_admin)
+def admin_view(request):
+    """
+    Admin-only view accessible only to users with 'Admin' role.
+    
+    BEGINNER EXPLANATION:
+    - @user_passes_test decorator checks if user passes the is_admin test
+    - If user is not Admin, they get redirected to login page
+    - Only Admin users can see this page and its content
+    """
+    return render(request, 'relationship_app/admin_view.html', {
+        'message': 'Welcome to the Admin Panel!',
+        'user_role': request.user.userprofile.role,
+    })
+
+
+@user_passes_test(is_librarian)
+def librarian_view(request):
+    """
+    Librarian-only view accessible only to users with 'Librarian' role.
+    
+    BEGINNER EXPLANATION:
+    - Only users with 'Librarian' role can access this view
+    - Librarians can manage books and see library statistics
+    - Non-librarians are redirected to login page
+    """
+    return render(request, 'relationship_app/librarian_view.html', {
+        'message': 'Welcome to the Librarian Dashboard!',
+        'user_role': request.user.userprofile.role,
+        'books': Book.objects.all(),  # Show all books to librarians
+    })
+
+
+@user_passes_test(is_member)
+def member_view(request):
+    """
+    Member-only view accessible only to users with 'Member' role.
+    
+    BEGINNER EXPLANATION:
+    - Only users with 'Member' role can access this view
+    - Members can browse books but have limited permissions
+    - Non-members are redirected to login page
+    """
+    return render(request, 'relationship_app/member_view.html', {
+        'message': 'Welcome to the Member Area!',
+        'user_role': request.user.userprofile.role,
+        'books': Book.objects.all()[:5],  # Show only first 5 books to members
+    })

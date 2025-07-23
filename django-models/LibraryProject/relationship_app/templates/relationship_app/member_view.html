@@ -1,0 +1,162 @@
+<!-- member_view.html -->
+<!--
+BEGINNER EXPLANATION:
+- This template is only accessible to users with 'Member' role
+- Shows limited book browsing and member-specific features
+- Members have the most restricted access level
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Area - Library System</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            background-color: #f8f9fa;
+        }
+        .member-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 5px solid #28a745;
+        }
+        h1 { 
+            color: #28a745; 
+            margin-bottom: 20px;
+        }
+        .role-badge {
+            background-color: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .member-features {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .feature-link {
+            display: inline-block;
+            margin: 5px 10px 5px 0;
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .feature-link:hover {
+            background-color: #218838;
+            color: white;
+        }
+        .books-preview {
+            margin: 20px 0;
+        }
+        .book-card {
+            padding: 15px;
+            margin: 10px 0;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            border-left: 3px solid #28a745;
+        }
+        .book-title {
+            font-weight: bold;
+            color: #333;
+            font-size: 16px;
+        }
+        .book-author {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .restricted-notice {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="member-container">
+        <h1>👤 Member Area</h1>
+        
+        <p>
+            <span class="role-badge">{{ user_role }}</span>
+            Welcome, {{ user.username }}! Enjoy browsing our library collection.
+        </p>
+        
+        <div class="member-features">
+            <h3>Available Features</h3>
+            <a href="{% url 'relationship_app:list_books' %}" class="feature-link">Browse Books</a>
+            <a href="#" class="feature-link">My Profile</a>
+            <a href="#" class="feature-link">Reading History</a>
+            <a href="#" class="feature-link">Recommendations</a>
+        </div>
+        
+        <div class="books-preview">
+            <h3>📚 Featured Books (Limited Preview)</h3>
+            <div class="restricted-notice">
+                <strong>Member Access:</strong> You can see a limited preview of books. 
+                <a href="{% url 'relationship_app:list_books' %}">View all books</a> for the complete collection.
+            </div>
+            
+            {% if books %}
+                {% for book in books %}
+                    <div class="book-card">
+                        <div class="book-title">{{ book.title }}</div>
+                        <div class="book-author">by {{ book.author.name }}</div>
+                    </div>
+                {% endfor %}
+                
+                {% if books|length >= 5 %}
+                    <p style="text-align: center; margin-top: 15px;">
+                        <a href="{% url 'relationship_app:list_books' %}" class="feature-link">
+                            View All Books →
+                        </a>
+                    </p>
+                {% endif %}
+            {% else %}
+                <p>No books available at the moment.</p>
+            {% endif %}
+        </div>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ccc;">
+            <h4>👥 Access Level: Member</h4>
+            <ul>
+                <li>✅ Browse books</li>
+                <li>✅ View book details</li>
+                <li>✅ Personal profile</li>
+                <li>✅ Reading recommendations</li>
+                <li>❌ Book management</li>
+                <li>❌ Administrative functions</li>
+                <li>❌ User management</li>
+            </ul>
+        </div>
+        
+        <div style="background-color: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 4px; margin: 20px 0;">
+            <h5 style="color: #0c5460; margin: 0 0 10px 0;">💡 Want More Access?</h5>
+            <p style="color: #0c5460; margin: 0;">
+                Contact an administrator to upgrade your account for additional features and permissions.
+            </p>
+        </div>
+        
+        <!-- Navigation -->
+        <div style="margin-top: 30px; text-align: center;">
+            <p>
+                <a href="{% url 'relationship_app:list_books' %}">← Back to Books</a> |
+                <a href="{% url 'relationship_app:logout' %}">Logout</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

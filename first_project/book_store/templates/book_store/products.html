@@ -1,0 +1,67 @@
+{% extends 'book_store/base.html' %}
+
+{% block title %}Products - Book Store{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>Our Products</h1>
+        <!-- Template filter example: length counts items -->
+        <p class="text-muted">Showing {{ products|length }} products</p>
+    </div>
+    <div class="col-md-4">
+        <!-- Search box -->
+        <input type="text" id="search-input" class="form-control" placeholder="Search products...">
+    </div>
+</div>
+
+<!-- Category Filter Buttons -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h5>Filter by Category:</h5>
+        <div class="btn-group" role="group">
+            <!-- Loop through available categories -->
+            {% for category in categories %}
+                <a href="?category={{ category }}" class="btn btn-outline-primary btn-sm">{{ category }}</a>
+            {% endfor %}
+            <a href="{% url 'products' %}" class="btn btn-outline-secondary btn-sm">Show All</a>
+        </div>
+    </div>
+</div>
+
+<!-- Products Grid -->
+<div class="row">
+    {% for product in products %}
+    <div class="col-md-4 mb-4">
+        <div class="product-card" data-product-id="{{ product.id }}">
+            <!-- Template filter example: capfirst capitalizes first letter -->
+            <h5>{{ product.name|capfirst }}</h5>
+            <!-- Template filter example: truncatewords limits description length -->
+            <p>{{ product.description|truncatewords:15 }}</p>
+            <!-- Template filter example: upper converts to uppercase -->
+            <span class="category-badge">{{ product.category|upper }}</span>
+            <!-- Template filter example: floatformat controls decimal places -->
+            <div class="price mt-2">${{ product.price|floatformat:2 }}</div>
+            <!-- Template filter example: date formats the creation date -->
+            <small class="text-muted">Product ID: {{ product.pk }}</small>
+        </div>
+    </div>
+    {% empty %}
+    <!-- This shows when no products match the filter -->
+    <div class="col-md-12">
+        <div class="alert alert-warning">
+            <h4>No products found!</h4>
+            <p>Try adjusting your search or category filter.</p>
+            <a href="{% url 'products' %}" class="btn btn-primary">View All Products</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination could go here in the future -->
+<div class="row mt-4">
+    <div class="col-md-12 text-center">
+        <p class="text-muted">Displaying all available products</p>
+    </div>
+</div>
+{% endblock %}

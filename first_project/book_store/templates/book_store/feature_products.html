@@ -1,0 +1,33 @@
+{% extends 'book_store/base.html' %}
+
+{% block title %}Featured Products - Book Store{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Featured Products</h1>
+        {% if perms.book_store.can_view_all_products %}
+            <div class="alert alert-success">
+                <strong>Full Access:</strong> You can view all products.
+            </div>
+        {% else %}
+            <div class="alert alert-warning">
+                <strong>Limited Access:</strong> You can only view featured products.
+            </div>
+        {% endif %}
+        
+        <div class="row">
+            {% for product in products %}
+            <div class="col-md-4 mb-3">
+                <div class="product-card">
+                    <h5>{{ product.name }}</h5>
+                    <p>{{ product.description|truncatewords:15 }}</p>
+                    <span class="category-badge">{{ product.category }}</span>
+                    <div class="price mt-2">${{ product.price }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

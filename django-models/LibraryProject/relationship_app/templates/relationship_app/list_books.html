@@ -1,0 +1,46 @@
+<!-- list_books.html -->
+<!-- 
+BEGINNER EXPLANATION:
+- This is an HTML template that Django will fill with data
+- {{ }} is Django template syntax for displaying variables
+- {% %} is Django template syntax for logic (loops, conditions)
+- The 'books' variable comes from our view's context dictionary
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List of Books</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        h1 { color: #333; }
+        ul { line-height: 1.6; }
+        li { margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Books Available:</h1>
+    
+    <!-- Check if there are any books -->
+    {% if books %}
+        <ul>
+            <!-- Loop through each book in the books list -->
+            {% for book in books %}
+                <li>
+                    <strong>{{ book.title }}</strong> by {{ book.author.name }}
+                </li>
+            {% endfor %}
+        </ul>
+        <p><em>Total books: {{ books|length }}</em></p>
+    {% else %}
+        <p>No books available in the database.</p>
+    {% endif %}
+    
+    <!-- Navigation links -->
+    <hr>
+    <p>
+        <a href="{% url 'admin:index' %}">Admin Panel</a>
+    </p>
+</body>
+</html>

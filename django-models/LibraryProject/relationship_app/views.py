@@ -1,11 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic.detail import DetailView
 from django.views.generic import ListView
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import LoginView, LogoutView
-from django.contrib.auth.decorators import user_passes_test
-from .models import Book, Library
+from django.contrib.auth.decorators import user_passes_test, permission_required
+from .models import Book, Library, Author
 
 # Create your views here.
 
@@ -235,4 +235,137 @@ def member_view(request):
         'message': 'Welcome to the Member Area!',
         'user_role': request.user.userprofile.role,
         'books': Book.objects.all()[:5],  # Show only first 5 books to members
+    })
+
+
+# =============================================================================
+# CUSTOM PERMISSIONS-BASED VIEWS
+# =============================================================================
+
+@permission_required('relationship_app.can_add_book', raise_exception=True)
+def add_book(request):
+    """
+    View for adding a new book - requires 'can_add_book' permission.
+    
+    BEGINNER EXPLANATION:
+    - @permission_required decorator checks if user has specific permission
+    - Only users with 'can_add_book' permission can access this view
+    - raise_exception=True means users without permission get a 403 error
+    - This view handles both showing the form (GET) and processing it (POST)
+    """
+    if request.method == 'POST':
+        # User submitted the form to add a book
+        title = request.POST.get('title')
+        author_id = request.POST.get('author')
+        
+        if title and author_id:
+            try:
+                author = Author.objects.get(id=author_id)
+                book = Book.objects.create(title=title, author=author)
+                return redirect('relationship_app:list_books')
+            except Author.DoesNotExist:
+                error = "Selected author does not exist."
+        else:
+            error = "Title and author are required."
+        
+        return render(request, 'relationship_app/add_book.html', {
+            'authors': Author.objects.all(),
+            'error': error,
+        })
+    else:
+        # GET request: Show the add book form
+        return render(request, 'relationship_app/add_book.html', {
+            'authors': Author.objects.all(),
+        })
+
+
+@permission_required('relationship_app.can_change_book', raise_exception=True)
+def edit_book(request, book_id):
+    """
+    View for editing an existing book - requires 'can_change_book' permission.
+    
+    BEGINNER EXPLANATION:
+    - Only users with 'can_change_book' permission can edit books
+    - book_id parameter comes from the URL pattern
+    - get_object_or_404 gets the book or shows 404 if not found
+    - Form shows current values and allows updating them
+    """
+    book = get_object_or_404(Book, id=book_id)
+    
+    if request.method == 'POST':
+        # User submitted the form to update the book
+        title = request.POST.get('title')
+        author_id = request.POST.get('author')
+        
+        if title and author_id:
+            try:
+                author = Author.objects.get(id=author_id)
+                book.title = title
+                book.author = author
+                book.save()
+                return redirect('relationship_app:list_books')
+            except Author.DoesNotExist:
+                error = "Selected author does not exist."
+        else:
+            error = "Title and author are required."
+        
+        return render(request, 'relationship_app/edit_book.html', {
+            'book': book,
+            'authors': Author.objects.all(),
+            'error': error,
+        })
+    else:
+        # GET request: Show the edit form with current values
+        return render(request, 'relationship_app/edit_book.html', {
+            'book': book,
+            'authors': Author.objects.all(),
+        })
+
+
+@permission_required('relationship_app.can_delete_book', raise_exception=True)
+def delete_book(request, book_id):
+    """
+    View for deleting a book - requires 'can_delete_book' permission.
+    
+    BEGINNER EXPLANATION:
+    - Only users with 'can_delete_book' permission can delete books
+    - Shows confirmation page (GET) before actually deleting (POST)
+    - This two-step process prevents accidental deletions
+    - After deletion, redirects back to book list
+    """
+    book = get_object_or_404(Book, id=book_id)
+    
+    if request.method == 'POST':
+        # User confirmed deletion
+        book.delete()
+        return redirect('relationship_app:list_books')
+    else:
+        # GET request: Show confirmation page
+        return render(request, 'relationship_app/delete_book.html', {
+            'book': book,
+        })
+
+
+def book_list_with_permissions(request):
+    """
+    Enhanced book list view that shows permission-based action buttons.
+    
+    BEGINNER EXPLANATION:
+    - This view shows all books like list_books()
+    - Additionally, it checks what permissions the current user has
+    - Template can show/hide Add/Edit/Delete buttons based on permissions
+    - Uses user.has_perm() to check specific permissions
+    """
+    books = Book.objects.all()
+    
+    # Check user's permissions for the template
+    user_permissions = {
+        'can_add': request.user.has_perm('relationship_app.can_add_book'),
+        'can_change': request.user.has_perm('relationship_app.can_change_book'),
+        'can_delete': request.user.has_perm('relationship_app.can_delete_book'),
+    }
+    
+    return render(request, 'relationship_app/book_list_with_permissions.html', {
+        'books': books,
+        'permissions': user_permissions,
     })

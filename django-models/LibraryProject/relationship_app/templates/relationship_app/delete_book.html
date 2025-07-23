@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Book</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .navigation {
+            margin-bottom: 20px;
+        }
+        .navigation a {
+            color: #007bff;
+            text-decoration: none;
+            margin-right: 15px;
+        }
+        .navigation a:hover {
+            text-decoration: underline;
+        }
+        .warning {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .book-info {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Navigation -->
+        <div class="navigation">
+            <a href="{% url 'relationship_app:list_books' %}">← Back to Books</a>
+            <a href="{% url 'relationship_app:admin_view' %}">Admin Panel</a>
+            <a href="{% url 'relationship_app:librarian_view' %}">Librarian Dashboard</a>
+        </div>
+
+        <h1>Delete Book</h1>
+        
+        <!-- User Info -->
+        {% if user.is_authenticated %}
+            <p><strong>Welcome, {{ user.username }}!</strong> 
+            {% if user.userprofile %}
+                (Role: {{ user.userprofile.role }})
+            {% endif %}
+            </p>
+        {% endif %}
+
+        <!-- Warning Message -->
+        <div class="warning">
+            <strong>⚠️ WARNING:</strong> You are about to permanently delete this book. This action cannot be undone!
+        </div>
+
+        <!-- Book Information -->
+        <div class="book-info">
+            <h3>Book to be deleted:</h3>
+            <p><strong>Title:</strong> {{ book.title }}</p>
+            <p><strong>Author:</strong> {{ book.author.name }}</p>
+        </div>
+
+        <!-- Confirmation Form -->
+        <form method="post">
+            {% csrf_token %}
+            <p>Are you sure you want to delete "<strong>{{ book.title }}</strong>" by {{ book.author.name }}?</p>
+            
+            <button type="submit" class="btn btn-danger">Yes, Delete Book</button>
+            <a href="{% url 'relationship_app:list_books' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+        
+        <!-- Instructions -->
+        <div style="margin-top: 30px; padding: 15px; background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px;">
+            <h3>Important Notes:</h3>
+            <ul>
+                <li>This action will permanently remove the book from the database</li>
+                <li>The book's author will remain in the system</li>
+                <li>Only users with "can_delete_book" permission can access this page</li>
+                <li>Click "Cancel" to return to the book list without deleting</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

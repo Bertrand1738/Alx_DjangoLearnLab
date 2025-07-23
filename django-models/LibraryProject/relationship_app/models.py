@@ -18,6 +18,22 @@ class Book(models.Model):
     title = models.CharField(max_length=200)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     
+    class Meta:
+        """
+        Meta class for Book model with custom permissions.
+        
+        BEGINNER EXPLANATION:
+        - Meta class provides metadata about the model
+        - permissions tuple defines custom permissions for this model
+        - Each permission has a code name and human-readable description
+        - These permissions can be assigned to users or groups
+        """
+        permissions = [
+            ("can_add_book", "Can add book"),
+            ("can_change_book", "Can change book"),
+            ("can_delete_book", "Can delete book"),
+        ]
+    
     def __str__(self):
         return self.title
 

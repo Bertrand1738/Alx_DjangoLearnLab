@@ -47,6 +47,22 @@ urlpatterns = [
     
     # URL: /member_view/ - Member-only page
     path('member_view/', views.member_view, name='member_view'),
+    
+    # =============================================================================
+    # CUSTOM PERMISSIONS-BASED URLS
+    # =============================================================================
+    
+    # URL: /books_with_permissions/ - Enhanced book list with permission-based actions
+    path('books_with_permissions/', views.book_list_with_permissions, name='book_list_with_permissions'),
+    
+    # URL: /add_book/ - Add new book (requires can_add_book permission)
+    path('add_book/', views.add_book, name='add_book'),
+    
+    # URL: /edit_book/1/ - Edit book with ID 1 (requires can_change_book permission)
+    path('edit_book/<int:book_id>/', views.edit_book, name='edit_book'),
+    
+    # URL: /delete_book/1/ - Delete book with ID 1 (requires can_delete_book permission)
+    path('delete_book/<int:book_id>/', views.delete_book, name='delete_book'),
 ]
 
 """

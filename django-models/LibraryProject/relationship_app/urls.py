@@ -9,7 +9,8 @@ BEGINNER EXPLANATION:
 """
 
 from django.urls import path
-from . import views
+from . import views  
+from .views import list_books
 
 # Define the app name for namespacing URLs
 app_name = 'relationship_app'
@@ -18,8 +19,8 @@ urlpatterns = [
     # Function-based view for listing all books
     # URL: /books/
     # When someone visits this URL, run the list_books function
-    path('books/', views.list_books, name='list_books'),
-    
+    path('books/', list_books, name='list_books'),
+
     # Class-based view for library details
     # URL: /library/1/ (where 1 is the library ID)
     # <int:pk> means capture an integer and pass it as 'pk' parameter

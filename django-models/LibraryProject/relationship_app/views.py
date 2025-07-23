@@ -78,6 +78,20 @@ class LibraryDetailView(DetailView):
 # USER AUTHENTICATION VIEWS
 # =============================================================================
 
+"""
+AUTHENTICATION IMPLEMENTATION NOTE:
+We use two approaches for authentication in this project:
+
+1. BUILT-IN VIEWS (Used in URLs):
+   - LoginView.as_view(template_name='...') in urls.py
+   - LogoutView.as_view(template_name='...') in urls.py
+   - These are Django's ready-made authentication views
+
+2. CUSTOM VIEWS (Examples below):
+   - Custom classes that inherit from Django's views
+   - Useful when you need to customize behavior
+"""
+
 def register(request):
     """
     Function-based view for user registration.

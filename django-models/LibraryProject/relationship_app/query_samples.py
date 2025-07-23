@@ -105,7 +105,7 @@ def retrieve_librarian_for_library(library_name):
     
     This demonstrates a OneToOne relationship query.
     When Librarian has a OneToOneField to Library, we can:
-    1. Access the librarian from the library using reverse lookup
+    1. Query the librarian directly using the library field
     2. Use try/except to handle cases where no librarian exists
     
     Args:
@@ -118,9 +118,8 @@ def retrieve_librarian_for_library(library_name):
         # Get the library first
         library = Library.objects.get(name=library_name)
         
-        # Access the librarian using reverse OneToOne relationship
-        # Django automatically creates a reverse relationship
-        librarian = library.librarian  # This uses the reverse lookup
+        # Query the librarian directly using the library object
+        librarian = Librarian.objects.get(library=library)
         
         print(f"Librarian for {library_name}: {librarian.name}")
         return librarian

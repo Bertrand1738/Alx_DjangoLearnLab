@@ -11,6 +11,7 @@ class Product(models.Model):
             ("can_view_all_products", "Can view all products"),
             ("can_manage_inventory", "Can manage inventory"),
             ("can_set_prices", "Can set product prices"),
+            ("can_delete_product", "Can delete products"),
         ]
 
     def __str__(self):

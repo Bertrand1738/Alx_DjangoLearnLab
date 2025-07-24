@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.shortcuts import redirect
 from .models import Product
+from django.shortcuts import get_object_or_404
 
 def index(request):
     # Get some featured products (first 3)
@@ -89,3 +90,33 @@ def feature_products(request):
     
     context = {'products': products}
     return render(request, 'book_store/feature_products.html', context)
+
+@login_required
+def delete_product(request, product_id):
+    """View to delete a product - only for users with delete permission"""
+    # Check if user has permission (custom or built-in) or is superuser
+    if not (request.user.has_perm('book_store.can_delete_product') or 
+            request.user.has_perm('book_store.delete_product') or 
+            request.user.is_superuser):
+        from django.core.exceptions import PermissionDenied
+        raise PermissionDenied("You don't have permission to delete products")
+    
+    print(f"🔍 DELETE VIEW CALLED: Method={request.method}, Product ID={product_id}")
+    print(f"🔍 User: {request.user.username}, Is Superuser: {request.user.is_superuser}")
+    
+    product = get_object_or_404(Product, id=product_id)
+    print(f"🔍 Product found: {product.name}")
+    
+    if request.method == 'POST':
+        print("🔍 POST request received - attempting to delete product")
+        product_name = product.name
+        product.delete()
+        print(f"🔍 Product '{product_name}' deleted successfully")
+        messages.success(request, f'Product "{product_name}" has been deleted successfully!')
+        return redirect('products')
+    
+    print("🔍 GET request - showing confirmation page")
+    context = {
+        'product': product,
+    }
+    return render(request, 'book_store/delete_product.html', context)

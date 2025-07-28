@@ -1,0 +1,139 @@
+<!-- register.html -->
+<!--
+BEGINNER EXPLANATION:
+- This template shows a registration form for new users
+- UserCreationForm includes username, password1, and password2 fields
+- Django automatically validates that passwords match
+- After successful registration, user is redirected and logged in
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Library System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .auth-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .links {
+            text-align: center;
+            margin-top: 20px;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .errorlist {
+            color: #dc3545;
+            list-style: none;
+            padding: 0;
+            margin-bottom: 15px;
+        }
+        .helptext {
+            font-size: 12px;
+            color: #666;
+            margin-top: -10px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <h1>📝 Create Account</h1>
+        
+        <!-- Display any form errors -->
+        {% if form.errors %}
+            <ul class="errorlist">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+        
+        <!-- Registration Form -->
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- Username Field -->
+            <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+            {{ form.username }}
+            {% if form.username.help_text %}
+                <div class="helptext">{{ form.username.help_text }}</div>
+            {% endif %}
+            
+            <!-- Password Field -->
+            <label for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
+            {{ form.password1 }}
+            {% if form.password1.help_text %}
+                <div class="helptext">{{ form.password1.help_text }}</div>
+            {% endif %}
+            
+            <!-- Confirm Password Field -->
+            <label for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
+            {{ form.password2 }}
+            {% if form.password2.help_text %}
+                <div class="helptext">{{ form.password2.help_text }}</div>
+            {% endif %}
+            
+            <button type="submit">Create Account</button>
+        </form>
+        
+        <!-- Navigation Links -->
+        <div class="links">
+            <p>Already have an account? <a href="{% url 'relationship_app:login' %}">Login here</a></p>
+            <p><a href="{% url 'relationship_app:list_books' %}">← Back to Books</a></p>
+        </div>
+    </div>
+</body>
+</html>

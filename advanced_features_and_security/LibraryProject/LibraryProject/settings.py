@@ -39,10 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
      'bookshelf',
      'relationship_app',
+     'csp',  # Content Security Policy
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'csp.middleware.CSPMiddleware',  # Content Security Policy - must be early
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -130,3 +132,107 @@ AUTH_USER_MODEL = 'bookshelf.CustomUser'
 import os
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# =============================================================================
+# SECURITY SETTINGS - BEST PRACTICES IMPLEMENTATION
+# =============================================================================
+
+# BEGINNER EXPLANATION:
+# These settings protect your Django application from common security vulnerabilities.
+# Each setting serves a specific purpose in hardening your application.
+
+# 1. CROSS-SITE REQUEST FORGERY (CSRF) PROTECTION
+# ================================================
+# CSRF tokens prevent malicious sites from submitting forms to your site
+CSRF_COOKIE_SECURE = True  # Only send CSRF cookies over HTTPS
+CSRF_COOKIE_HTTPONLY = True  # Prevent JavaScript access to CSRF cookie
+CSRF_COOKIE_SAMESITE = 'Strict'  # Strict same-site policy for CSRF cookies
+CSRF_USE_SESSIONS = True  # Store CSRF token in session instead of cookie
+
+# 2. SESSION SECURITY
+# ===================
+# Sessions store user login information - must be protected
+SESSION_COOKIE_SECURE = True  # Only send session cookies over HTTPS
+SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie
+SESSION_COOKIE_SAMESITE = 'Strict'  # Strict same-site policy for session cookies
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # End session when browser closes
+SESSION_COOKIE_AGE = 3600  # Session expires after 1 hour (3600 seconds)
+
+# 3. SECURE HEADERS
+# =================
+# These headers tell browsers how to handle your site securely
+SECURE_BROWSER_XSS_FILTER = True  # Enable browser's XSS filtering
+SECURE_CONTENT_TYPE_NOSNIFF = True  # Prevent MIME type sniffing
+X_FRAME_OPTIONS = 'DENY'  # Prevent your site from being embedded in frames
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'  # Control referrer information
+
+# 4. HTTPS/SSL SECURITY
+# =====================
+# Force HTTPS for all connections (comment out for development)
+# SECURE_SSL_REDIRECT = True  # Redirect all HTTP to HTTPS
+# SECURE_HSTS_SECONDS = 31536000  # HTTP Strict Transport Security (1 year)
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Apply HSTS to subdomains
+# SECURE_HSTS_PRELOAD = True  # Allow browser preloading of HSTS
+
+# NOTE: HTTPS settings are commented out for development.
+# UNCOMMENT these when deploying to production with proper SSL certificate.
+
+# 5. DEVELOPMENT VS PRODUCTION SECURITY
+# =====================================
+# In development, we need to allow some insecure practices for testing
+if DEBUG:
+    # Development settings - less restrictive for testing
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+    ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver']  # Added testserver for testing
+    
+    # Add security warning for development
+    import warnings
+    warnings.warn(
+        "🚨 SECURITY WARNING: This application is running in DEBUG mode. "
+        "Do NOT deploy to production with DEBUG=True!",
+        UserWarning
+    )
+else:
+    # Production settings - maximum security
+    ALLOWED_HOSTS = ['yourdomain.com', 'www.yourdomain.com']  # Set your actual domain
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+# 6. CONTENT SECURITY POLICY (CSP)
+# =================================
+# CSP prevents XSS attacks by controlling which resources can be loaded
+# Updated to use django-csp 4.0+ format
+CONTENT_SECURITY_POLICY = {
+    'DIRECTIVES': {
+        'default-src': ("'self'",),           # Only allow resources from same origin
+        'script-src': ("'self'", "'unsafe-inline'"),  # Allow inline scripts (be careful!)
+        'style-src': ("'self'", "'unsafe-inline'"),   # Allow inline styles
+        'img-src': ("'self'", "data:"),       # Allow images from same origin and data URLs
+        'font-src': ("'self'",),              # Only allow fonts from same origin
+    }
+}
+
+# 7. SECURITY LOGGING
+# ===================
+# Log security events for monitoring
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'security_file': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'security.log',
+        },
+    },
+    'loggers': {
+        'django.security': {
+            'handlers': ['security_file'],
+            'level': 'WARNING',
+            'propagate': True,
+        },
+    },
+}

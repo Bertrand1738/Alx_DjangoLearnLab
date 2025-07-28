@@ -180,3 +180,133 @@ class BookSearchForm(forms.Form):
                 raise ValidationError("Too many wildcard characters in search.")
         
         return query
+
+
+class ExampleForm(forms.Form):
+    """
+    Example form demonstrating Django security best practices.
+    
+    SECURITY FEATURES DEMONSTRATED:
+    - CSRF protection (handled by view)
+    - Input validation and sanitization
+    - XSS prevention through escaping
+    - Field-specific validation methods
+    """
+    
+    name = forms.CharField(
+        max_length=100,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your name',
+            'maxlength': 100,
+        })
+    )
+    
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your email',
+        })
+    )
+    
+    message = forms.CharField(
+        max_length=500,
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your message (optional)',
+            'rows': 4,
+            'maxlength': 500,
+        })
+    )
+    
+    agree_terms = forms.BooleanField(
+        required=True,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        label='I agree to the terms and conditions'
+    )
+
+    def clean_name(self):
+        """
+        Validate and sanitize name field.
+        
+        Security measures:
+        - Strip whitespace
+        - Check for minimum length
+        - Prevent script injection
+        - Allow only safe characters
+        """
+        name = self.cleaned_data.get('name')
+        
+        if not name:
+            raise ValidationError("Name is required.")
+        
+        # Strip whitespace and convert to title case
+        name = name.strip().title()
+        
+        # Check minimum length
+        if len(name) < 2:
+            raise ValidationError("Name must be at least 2 characters long.")
+        
+        # Prevent potential script injection
+        dangerous_patterns = ['<script', '</script', 'javascript:', 'onclick=', 'onerror=']
+        name_lower = name.lower()
+        
+        for pattern in dangerous_patterns:
+            if pattern in name_lower:
+                raise ValidationError("Name contains invalid characters.")
+        
+        # Allow only letters, spaces, hyphens, and apostrophes
+        if not re.match(r"^[a-zA-Z\s\-'\.]+$", name):
+            raise ValidationError("Name can only contain letters, spaces, hyphens, and apostrophes.")
+        
+        return name
+
+    def clean_message(self):
+        """
+        Validate and sanitize message field.
+        
+        Security measures:
+        - Strip whitespace
+        - Check for reasonable length
+        - Prevent script injection
+        """
+        message = self.cleaned_data.get('message')
+        
+        if message:
+            # Strip whitespace
+            message = message.strip()
+            
+            # Check reasonable length (even though max_length is set)
+            if len(message) > 500:
+                raise ValidationError("Message is too long (maximum 500 characters).")
+            
+            # Prevent potential script injection
+            dangerous_patterns = ['<script', '</script', 'javascript:', 'onclick=', 'onerror=', 'onload=']
+            message_lower = message.lower()
+            
+            for pattern in dangerous_patterns:
+                if pattern in message_lower:
+                    raise ValidationError("Message contains invalid content.")
+        
+        return message
+
+    def clean(self):
+        """
+        Overall form validation.
+        
+        Security measures:
+        - Cross-field validation
+        - Additional security checks
+        """
+        cleaned_data = super().clean()
+        name = cleaned_data.get('name')
+        email = cleaned_data.get('email')
+        
+        # Ensure name and email don't match (basic business logic)
+        if name and email and name.lower() in email.lower():
+            raise ValidationError("Name and email appear to be too similar.")
+        
+        return cleaned_data

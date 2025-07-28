@@ -34,6 +34,7 @@
         <div class="navbar">
             <a href="/bookshelf/books/">📚 Books</a>
             <a href="/bookshelf/permissions/">🔐 My Permissions</a>
+            <a href="/bookshelf/example-form/">🛡️ Security Demo</a>
             <a href="/admin/">👑 Admin</a>
             <span style="float: right;">
                 Welcome, {{ user.username }}! 
@@ -44,10 +45,10 @@
         {% if user.is_authenticated %}
             <div class="permissions-info">
                 <strong>🔐 Your Permissions:</strong>
-                {% if user.has_perm:'bookshelf.can_view' %}✅ View{% else %}❌ View{% endif %} |
-                {% if user.has_perm:'bookshelf.can_create' %}✅ Create{% else %}❌ Create{% endif %} |
-                {% if user.has_perm:'bookshelf.can_edit' %}✅ Edit{% else %}❌ Edit{% endif %} |
-                {% if user.has_perm:'bookshelf.can_delete' %}✅ Delete{% else %}❌ Delete{% endif %}
+                {% if perms.bookshelf.can_view %}✅ View{% else %}❌ View{% endif %} |
+                {% if perms.bookshelf.can_create %}✅ Create{% else %}❌ Create{% endif %} |
+                {% if perms.bookshelf.can_edit %}✅ Edit{% else %}❌ Edit{% endif %} |
+                {% if perms.bookshelf.can_delete %}✅ Delete{% else %}❌ Delete{% endif %}
             </div>
         {% endif %}
 

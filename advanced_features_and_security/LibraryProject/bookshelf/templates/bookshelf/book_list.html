@@ -34,7 +34,7 @@
 </div>
 
 <div style="margin-bottom: 20px;">
-    {% if user.has_perm:'bookshelf.can_create' %}
+    {% if perms.bookshelf.can_create %}
         <a href="{% url 'book_create' %}" class="btn btn-success">➕ Add New Book</a>
     {% else %}
         <span style="color: #666;">ℹ️ You need 'Create' permission to add books</span>
@@ -64,15 +64,15 @@
                 <td>{{ book.author|escape }}</td>
                 <td>{{ book.publication_year }}</td>
                 <td>
-                    {% if user.has_perm:'bookshelf.can_edit' %}
+                    {% if perms.bookshelf.can_edit %}
                         <a href="{% url 'book_edit' book.pk %}" class="btn" style="background: #ffc107; color: #000;">✏️ Edit</a>
                     {% endif %}
                     
-                    {% if user.has_perm:'bookshelf.can_delete' %}
-                        <a href="{% url 'book_delete' book.pk %}" class="btn btn-danger">🗑️ Delete</a>
+                    {% if perms.bookshelf.can_delete %}
+                        <a href="{% url 'book_confirm_delete' book.pk %}" class="btn btn-danger">🗑️ Delete</a>
                     {% endif %}
                     
-                    {% if not user.has_perm:'bookshelf.can_edit' and not user.has_perm:'bookshelf.can_delete' %}
+                    {% if not perms.bookshelf.can_edit and not perms.bookshelf.can_delete %}
                         <span style="color: #666; font-style: italic;">View only</span>
                     {% endif %}
                 </td>
@@ -102,7 +102,7 @@
     
 {% else %}
     <p>📖 No books found.</p>
-    {% if user.has_perm:'bookshelf.can_create' %}
+    {% if perms.bookshelf.can_create %}
         <p><a href="{% url 'book_create' %}" class="btn btn-success">Add the first book!</a></p>
     {% endif %}
 {% endif %}

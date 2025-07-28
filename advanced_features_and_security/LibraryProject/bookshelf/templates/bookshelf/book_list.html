@@ -1,0 +1,71 @@
+{% extends 'bookshelf/base.html' %}
+
+{% block title %}Book List - Bookshelf{% endblock %}
+
+{% block content %}
+<h1>📚 Book Library</h1>
+
+<div style="margin-bottom: 20px;">
+    {% if user.has_perm:'bookshelf.can_create' %}
+        <a href="{% url 'book_create' %}" class="btn btn-success">➕ Add New Book</a>
+    {% else %}
+        <span style="color: #666;">ℹ️ You need 'Create' permission to add books</span>
+    {% endif %}
+</div>
+
+{% if books %}
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Publication Year</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for book in books %}
+            <tr>
+                <td>{{ book.title }}</td>
+                <td>{{ book.author }}</td>
+                <td>{{ book.publication_year }}</td>
+                <td>
+                    {% if user.has_perm:'bookshelf.can_edit' %}
+                        <a href="{% url 'book_edit' book.pk %}" class="btn" style="background: #ffc107; color: #000;">✏️ Edit</a>
+                    {% endif %}
+                    
+                    {% if user.has_perm:'bookshelf.can_delete' %}
+                        <a href="{% url 'book_delete' book.pk %}" class="btn btn-danger">🗑️ Delete</a>
+                    {% endif %}
+                    
+                    {% if not user.has_perm:'bookshelf.can_edit' and not user.has_perm:'bookshelf.can_delete' %}
+                        <span style="color: #666; font-style: italic;">View only</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>📖 No books in the library yet.</p>
+    {% if user.has_perm:'bookshelf.can_create' %}
+        <p><a href="{% url 'book_create' %}" class="btn btn-success">Add the first book!</a></p>
+    {% endif %}
+{% endif %}
+
+<div style="margin-top: 30px; padding: 15px; background: #f8f9fa; border-radius: 4px;">
+    <h3>🎯 Permission Testing Guide</h3>
+    <p><strong>To test permissions:</strong></p>
+    <ol>
+        <li>Go to <a href="/admin/">Django Admin</a></li>
+        <li>Create test users and assign them to different groups</li>
+        <li>Log in as different users to see how permissions work</li>
+    </ol>
+    <p><strong>Groups available:</strong></p>
+    <ul>
+        <li><strong>Viewers:</strong> Can only view books</li>
+        <li><strong>Editors:</strong> Can view, create, and edit books</li>
+        <li><strong>Admins:</strong> Can do everything (view, create, edit, delete)</li>
+    </ul>
+</div>
+{% endblock %}

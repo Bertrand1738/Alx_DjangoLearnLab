@@ -1,0 +1,30 @@
+{% extends 'bookshelf/base.html' %}
+
+{% block title %}Delete Book - Bookshelf{% endblock %}
+
+{% block content %}
+<h1>🗑️ Delete Book</h1>
+
+<div style="background: #f8d7da; color: #721c24; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+    <h3>⚠️ Are you sure?</h3>
+    <p>You are about to permanently delete this book:</p>
+    <ul>
+        <li><strong>Title:</strong> {{ book.title }}</li>
+        <li><strong>Author:</strong> {{ book.author }}</li>
+        <li><strong>Year:</strong> {{ book.publication_year }}</li>
+    </ul>
+    <p><strong>This action cannot be undone!</strong></p>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">🗑️ Yes, Delete This Book</button>
+    <a href="{% url 'book_list' %}" class="btn" style="background: #6c757d;">◀️ Cancel</a>
+</form>
+
+<div style="margin-top: 30px; padding: 15px; background: #f8d7da; border-radius: 4px;">
+    <h4>🔐 Permission Required</h4>
+    <p>You have the <strong>'can_delete'</strong> permission, which allows you to remove books from the library.</p>
+    <p>This is typically only given to Admins due to the destructive nature of this action.</p>
+</div>
+{% endblock %}

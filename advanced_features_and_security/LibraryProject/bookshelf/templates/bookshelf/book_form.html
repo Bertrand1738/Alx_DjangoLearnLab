@@ -1,0 +1,45 @@
+{% extends 'bookshelf/base.html' %}
+
+{% block title %}{{ action }} Book - Bookshelf{% endblock %}
+
+{% block content %}
+<h1>{{ action }} Book</h1>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="form-group">
+        <label for="title">Book Title:</label>
+        <input type="text" id="title" name="title" value="{{ book.title|default:'' }}" required>
+    </div>
+    
+    <div class="form-group">
+        <label for="author">Author:</label>
+        <input type="text" id="author" name="author" value="{{ book.author|default:'' }}" required>
+    </div>
+    
+    <div class="form-group">
+        <label for="publication_year">Publication Year:</label>
+        <input type="number" id="publication_year" name="publication_year" 
+               value="{{ book.publication_year|default:'' }}" min="1000" max="2100" required>
+    </div>
+    
+    <div style="margin-top: 20px;">
+        <button type="submit" class="btn btn-success">
+            {% if action == 'Create' %}➕ Create Book{% else %}💾 Update Book{% endif %}
+        </button>
+        <a href="{% url 'book_list' %}" class="btn" style="background: #6c757d;">◀️ Back to List</a>
+    </div>
+</form>
+
+<div style="margin-top: 30px; padding: 15px; background: #fff3cd; border-radius: 4px;">
+    <h4>🔐 Permission Required</h4>
+    <p>
+        {% if action == 'Create' %}
+            You have the <strong>'can_create'</strong> permission, which allows you to add new books to the library.
+        {% else %}
+            You have the <strong>'can_edit'</strong> permission, which allows you to modify existing books.
+        {% endif %}
+    </p>
+</div>
+{% endblock %}

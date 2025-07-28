@@ -82,5 +82,23 @@ class Book(models.Model):
     author = models.CharField(max_length=100)
     publication_year = models.IntegerField()
 
+    class Meta:
+        """
+        Meta class for Book model with custom permissions.
+        
+        BEGINNER EXPLANATION:
+        - Meta class provides metadata about the model
+        - permissions list defines custom permissions for this model
+        - Each permission has a codename and human-readable description
+        - These permissions can be assigned to users or groups
+        - Format: ('permission_codename', 'Human readable description')
+        """
+        permissions = [
+            ('can_view', 'Can view book'),
+            ('can_create', 'Can create book'),
+            ('can_edit', 'Can edit book'),
+            ('can_delete', 'Can delete book'),
+        ]
+
     def __str__(self):
         return f"{self.title} by {self.author} ({self.publication_year})"

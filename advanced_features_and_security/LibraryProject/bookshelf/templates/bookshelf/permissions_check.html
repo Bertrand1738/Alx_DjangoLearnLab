@@ -1,0 +1,101 @@
+{% extends 'bookshelf/base.html' %}
+
+{% block title %}My Permissions - Bookshelf{% endblock %}
+
+{% block content %}
+<h1>🔐 My Permissions & Groups</h1>
+
+<div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+    <h2>👤 User Information</h2>
+    <ul>
+        <li><strong>Username:</strong> {{ user.username }}</li>
+        <li><strong>Email:</strong> {{ user.email }}</li>
+        <li><strong>Staff Status:</strong> {% if user.is_staff %}✅ Yes{% else %}❌ No{% endif %}</li>
+        <li><strong>Superuser:</strong> {% if user.is_superuser %}✅ Yes{% else %}❌ No{% endif %}</li>
+    </ul>
+</div>
+
+<div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+    <h2>👥 Groups</h2>
+    {% if user_groups %}
+        <ul>
+            {% for group in user_groups %}
+                <li><strong>{{ group.name }}</strong></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>❌ You are not assigned to any groups.</p>
+        <p>Contact an administrator to get assigned to a group.</p>
+    {% endif %}
+</div>
+
+<div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+    <h2>🔑 Book Permissions</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Permission</th>
+                <th>Status</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>can_view</strong></td>
+                <td>{% if user_permissions.can_view %}✅ Granted{% else %}❌ Denied{% endif %}</td>
+                <td>View books in the library</td>
+            </tr>
+            <tr>
+                <td><strong>can_create</strong></td>
+                <td>{% if user_permissions.can_create %}✅ Granted{% else %}❌ Denied{% endif %}</td>
+                <td>Add new books to the library</td>
+            </tr>
+            <tr>
+                <td><strong>can_edit</strong></td>
+                <td>{% if user_permissions.can_edit %}✅ Granted{% else %}❌ Denied{% endif %}</td>
+                <td>Modify existing books</td>
+            </tr>
+            <tr>
+                <td><strong>can_delete</strong></td>
+                <td>{% if user_permissions.can_delete %}✅ Granted{% else %}❌ Denied{% endif %}</td>
+                <td>Remove books from the library</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div style="background: #d4edda; padding: 20px; border-radius: 8px;">
+    <h2>📋 What Can I Do?</h2>
+    <ul>
+        {% if user_permissions.can_view %}
+            <li>✅ You can <a href="{% url 'book_list' %}">view the book library</a></li>
+        {% else %}
+            <li>❌ You cannot view books (need 'can_view' permission)</li>
+        {% endif %}
+        
+        {% if user_permissions.can_create %}
+            <li>✅ You can <a href="{% url 'book_create' %}">create new books</a></li>
+        {% else %}
+            <li>❌ You cannot create books (need 'can_create' permission)</li>
+        {% endif %}
+        
+        {% if user_permissions.can_edit %}
+            <li>✅ You can edit existing books</li>
+        {% else %}
+            <li>❌ You cannot edit books (need 'can_edit' permission)</li>
+        {% endif %}
+        
+        {% if user_permissions.can_delete %}
+            <li>✅ You can delete books</li>
+        {% else %}
+            <li>❌ You cannot delete books (need 'can_delete' permission)</li>
+        {% endif %}
+    </ul>
+    
+    {% if not user_permissions.can_view %}
+        <div style="margin-top: 15px; padding: 10px; background: #f8d7da; border-radius: 4px;">
+            <strong>🚨 No Permissions!</strong> You need to be assigned to a group to access the book library.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

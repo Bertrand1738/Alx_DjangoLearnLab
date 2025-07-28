@@ -22,4 +22,7 @@ urlpatterns = [
     # Include relationship_app URLs
     # This means URLs starting with 'relationship_app/' will be handled by our app
     path('relationship_app/', include('relationship_app.urls')),
+    
+    # Include bookshelf URLs with permissions
+    path('bookshelf/', include('bookshelf.urls')),
 ]

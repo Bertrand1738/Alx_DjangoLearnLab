@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -149,57 +150,165 @@ CSRF_COOKIE_HTTPONLY = True  # Prevent JavaScript access to CSRF cookie
 CSRF_COOKIE_SAMESITE = 'Strict'  # Strict same-site policy for CSRF cookies
 CSRF_USE_SESSIONS = True  # Store CSRF token in session instead of cookie
 
-# 2. SESSION SECURITY
-# ===================
-# Sessions store user login information - must be protected
-SESSION_COOKIE_SECURE = True  # Only send session cookies over HTTPS
-SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie
-SESSION_COOKIE_SAMESITE = 'Strict'  # Strict same-site policy for session cookies
+# 2. SESSION AND COOKIE SECURITY
+# ===============================
+# Sessions store user login information and must be protected
+# Cookies can contain sensitive data and require secure transmission
+
+# Session Cookie Security
+SESSION_COOKIE_SECURE = not DEBUG  # Only send session cookies over HTTPS (auto-enable in production)
+SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie (XSS protection)
+SESSION_COOKIE_SAMESITE = 'Strict'  # Strict same-site policy for session cookies (CSRF protection)
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # End session when browser closes
 SESSION_COOKIE_AGE = 3600  # Session expires after 1 hour (3600 seconds)
+SESSION_COOKIE_NAME = 'sessionid'  # Default session cookie name
+SESSION_SAVE_EVERY_REQUEST = False  # Only save session if modified (performance)
 
-# 3. SECURE HEADERS
-# =================
-# These headers tell browsers how to handle your site securely
-SECURE_BROWSER_XSS_FILTER = True  # Enable browser's XSS filtering
-SECURE_CONTENT_TYPE_NOSNIFF = True  # Prevent MIME type sniffing
-X_FRAME_OPTIONS = 'DENY'  # Prevent your site from being embedded in frames
-SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'  # Control referrer information
+# CSRF Cookie Security
+CSRF_COOKIE_SECURE = not DEBUG  # Only send CSRF cookies over HTTPS (auto-enable in production)
+CSRF_COOKIE_HTTPONLY = True  # Prevent JavaScript access to CSRF cookie
+CSRF_COOKIE_SAMESITE = 'Strict'  # Strict same-site policy for CSRF cookies
+CSRF_COOKIE_AGE = 31449600  # CSRF cookie expires after 1 year
+CSRF_USE_SESSIONS = True  # Store CSRF token in session instead of cookie (more secure)
+CSRF_COOKIE_NAME = 'csrftoken'  # Default CSRF cookie name
+
+# Additional Cookie Security Settings
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Store sessions in database
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'  # Use JSON serializer
+
+# Security Note: In production with HTTPS:
+# - SESSION_COOKIE_SECURE and CSRF_COOKIE_SECURE should be True
+# - This ensures cookies are only transmitted over encrypted connections
+# - In development (DEBUG=True), these are set to False for local testing
+
+# 3. SECURE HTTP HEADERS
+# =======================
+# Security headers instruct browsers on how to handle your site securely
+# These headers provide defense against various attack vectors
+
+# XSS (Cross-Site Scripting) Protection
+SECURE_BROWSER_XSS_FILTER = True  # Enable browser's built-in XSS filtering
+# Note: This header is deprecated in modern browsers but kept for legacy support
+
+# MIME Type Security
+SECURE_CONTENT_TYPE_NOSNIFF = True  # Prevent browsers from MIME-sniffing responses
+# This prevents browsers from trying to guess content types, which can lead to security issues
+
+# Clickjacking Protection
+X_FRAME_OPTIONS = 'DENY'  # Prevent your site from being embedded in frames/iframes
+# Options: 'DENY' (never allow framing), 'SAMEORIGIN' (allow same-origin framing)
+
+# Referrer Policy
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+# Controls how much referrer information is included with requests
+# 'strict-origin-when-cross-origin': Send full URL for same-origin, origin only for cross-origin HTTPS
+
+# Additional Security Headers (custom implementation in middleware or views)
+# These can be added via custom middleware for more granular control:
+SECURITY_HEADERS = {
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'X-XSS-Protection': '1; mode=block',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',  # Feature Policy
+}
+
+# Content Security Policy is configured separately below
+# These headers work together to create multiple layers of security
 
 # 4. HTTPS/SSL SECURITY
 # =====================
-# Force HTTPS for all connections (comment out for development)
-# SECURE_SSL_REDIRECT = True  # Redirect all HTTP to HTTPS
-# SECURE_HSTS_SECONDS = 31536000  # HTTP Strict Transport Security (1 year)
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Apply HSTS to subdomains
-# SECURE_HSTS_PRELOAD = True  # Allow browser preloading of HSTS
+# These settings enforce HTTPS connections and implement security best practices
+# for secure web communication
 
-# NOTE: HTTPS settings are commented out for development.
-# UNCOMMENT these when deploying to production with proper SSL certificate.
+# Production HTTPS Settings (enable in production)
+# SECURE_SSL_REDIRECT: Redirects all HTTP requests to HTTPS
+# Set to True in production to enforce HTTPS-only access
+SECURE_SSL_REDIRECT = not DEBUG  # Auto-enable in production
 
-# 5. DEVELOPMENT VS PRODUCTION SECURITY
-# =====================================
-# In development, we need to allow some insecure practices for testing
+# HTTP Strict Transport Security (HSTS)
+# Tells browsers to only access this site via HTTPS for the specified duration
+SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0  # 1 year in production, disabled in dev
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Apply HSTS policy to all subdomains
+SECURE_HSTS_PRELOAD = True  # Allow browsers to preload HSTS for this domain
+
+# Secure Proxy Headers
+# Important for deployment behind reverse proxies (nginx, load balancers)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Additional HTTPS Security Settings
+SECURE_SSL_HOST = None  # Redirect to specific host if needed
+SECURE_REDIRECT_EXEMPT = []  # URLs exempt from HTTPS redirect (use sparingly)
+
+# NOTE: When deploying to production:
+# 1. Ensure SSL certificate is properly configured on your web server
+# 2. Update ALLOWED_HOSTS with your actual domain names
+# 3. Test HTTPS redirect functionality
+# 4. Monitor HSTS header implementation
+
+# 5. ENVIRONMENT-SPECIFIC SECURITY CONFIGURATION
+# ===============================================
+# Different security settings for development vs production environments
+
 if DEBUG:
-    # Development settings - less restrictive for testing
-    CSRF_COOKIE_SECURE = False
-    SESSION_COOKIE_SECURE = False
-    ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver']  # Added testserver for testing
+    # DEVELOPMENT ENVIRONMENT SETTINGS
+    # ================================
+    # Less restrictive settings for local development and testing
     
-    # Add security warning for development
+    # Allow local development hosts
+    ALLOWED_HOSTS = [
+        '127.0.0.1', 
+        'localhost', 
+        'testserver',  # For Django testing
+        '0.0.0.0',     # For Docker development
+    ]
+    
+    # Disable HTTPS requirements for local development
+    # (These are automatically managed by the settings above)
+    
+    # Development-specific security relaxations
+    SECURE_SSL_REDIRECT = False  # Allow HTTP in development
+    
+    # Add security warning for development mode
     import warnings
     warnings.warn(
         "🚨 SECURITY WARNING: This application is running in DEBUG mode. "
-        "Do NOT deploy to production with DEBUG=True!",
+        "Do NOT deploy to production with DEBUG=True! "
+        "HTTPS enforcement is disabled for local development.",
         UserWarning
     )
+    
 else:
-    # Production settings - maximum security
-    ALLOWED_HOSTS = ['yourdomain.com', 'www.yourdomain.com']  # Set your actual domain
+    # PRODUCTION ENVIRONMENT SETTINGS
+    # ===============================
+    # Maximum security configuration for production deployment
+    
+    # Production domain configuration
+    # UPDATE THESE WITH YOUR ACTUAL DOMAIN NAMES
+    ALLOWED_HOSTS = [
+        'yourdomain.com',           # Replace with your domain
+        'www.yourdomain.com',       # Replace with your www domain
+        'api.yourdomain.com',       # Add any subdomains you use
+        # Add your production server IP if needed
+    ]
+    
+    # Force HTTPS in production
     SECURE_SSL_REDIRECT = True
-    SECURE_HSTS_SECONDS = 31536000
+    
+    # Additional production security measures
+    SECURE_HSTS_SECONDS = 31536000  # 1 year HSTS
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+    
+    # Production-specific settings
+    SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', SECRET_KEY)  # Use environment variable
+    
+    # Additional production recommendations:
+    # 1. Use environment variables for sensitive settings
+    # 2. Set up proper SSL certificates (Let's Encrypt, commercial CA)
+    # 3. Configure your web server (nginx/Apache) for HTTPS
+    # 4. Implement monitoring and alerting for security events
+    # 5. Regular security audits and dependency updates
 
 # 6. CONTENT SECURITY POLICY (CSP)
 # =================================

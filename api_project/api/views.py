@@ -3,6 +3,7 @@ from rest_framework import generics
 from .models import Book
 from .serializers import BookSerializer
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
 
 from django.http import JsonResponse
 
@@ -21,5 +22,10 @@ class BookList(generics.ListAPIView):
 
 # Create your views here.
 class BookViewSet(viewsets.ModelViewSet):
+    """
+    This API uses token authentication. Obtain a token at /api/token/ by POSTing your username and password.
+    All endpoints require a valid token in the `Authorization` header.
+    """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
+    permission_classes = [IsAuthenticated]

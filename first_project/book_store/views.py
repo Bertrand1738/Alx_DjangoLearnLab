@@ -7,6 +7,8 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from .models import Product
 from django.shortcuts import get_object_or_404
+from .forms import ProductForm, ProductSearchForm
+from django.db.models import Q
 
 def index(request):
     # Get some featured products (first 3)
@@ -120,3 +122,105 @@ def delete_product(request, product_id):
         'product': product,
     }
     return render(request, 'book_store/delete_product.html', context)
+
+# Secure Product Management Views
+@login_required
+@permission_required('book_store.add_product', raise_exception=True)
+def add_product(request):
+    """
+    Secure view for adding new products with validation
+    """
+    print(f"🔍 ADD PRODUCT VIEW: Method={request.method}, User={request.user.username}")
+    
+    if request.method == 'POST':
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            product = form.save()
+            print(f"✅ Product created: {product.name}")
+            messages.success(request, f'Product "{product.name}" has been added successfully!')
+            return redirect('products')
+        else:
+            print(f"❌ Form validation failed: {form.errors}")
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ProductForm()
+    
+    context = {
+        'form': form,
+        'title': 'Add New Product'
+    }
+    return render(request, 'book_store/product_form.html', context)
+
+@login_required
+@permission_required('book_store.change_product', raise_exception=True)
+def edit_product(request, product_id):
+    """
+    Secure view for editing existing products
+    """
+    product = get_object_or_404(Product, id=product_id)
+    print(f"🔍 EDIT PRODUCT VIEW: Method={request.method}, Product={product.name}")
+    
+    if request.method == 'POST':
+        form = ProductForm(request.POST, instance=product)
+        if form.is_valid():
+            updated_product = form.save()
+            print(f"✅ Product updated: {updated_product.name}")
+            messages.success(request, f'Product "{updated_product.name}" has been updated successfully!')
+            return redirect('products')
+        else:
+            print(f"❌ Form validation failed: {form.errors}")
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = ProductForm(instance=product)
+    
+    context = {
+        'form': form,
+        'product': product,
+        'title': f'Edit {product.name}'
+    }
+    return render(request, 'book_store/product_form.html', context)
+
+def secure_products(request):
+    """
+    Enhanced products view with secure search functionality
+    """
+    # Initialize search form
+    search_form = ProductSearchForm(request.GET)
+    products = Product.objects.all()
+    
+    # Apply filters if form is valid
+    if search_form.is_valid():
+        query = search_form.cleaned_data.get('query')
+        category = search_form.cleaned_data.get('category')
+        min_price = search_form.cleaned_data.get('min_price')
+        max_price = search_form.cleaned_data.get('max_price')
+        
+        # Apply search filters
+        if query:
+            products = products.filter(
+                Q(name__icontains=query) | 
+                Q(description__icontains=query)
+            )
+        
+        if category:
+            products = products.filter(category=category)
+        
+        if min_price:
+            products = products.filter(price__gte=min_price)
+        
+        if max_price:
+            products = products.filter(price__lte=max_price)
+    
+    # Order by price (lowest first)
+    products = products.order_by('price')
+    
+    # Get unique categories for filter buttons
+    categories = Product.objects.values_list('category', flat=True).distinct()
+    
+    context = {
+        'products': products,
+        'categories': categories,
+        'search_form': search_form,
+        'selected_category': request.GET.get('category'),
+    }
+    return render(request, 'book_store/secure_products.html', context)

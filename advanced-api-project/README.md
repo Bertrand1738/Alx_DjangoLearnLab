@@ -20,18 +20,41 @@ advanced-api-project/
 └── create_test_data.py   # Script to create test data
 ```
 
-## API Endpoints
+## API Endpoints with Advanced Query Capabilities
 
 ### Book Endpoints
 
-| HTTP Method | URL | View Class | Purpose | Permissions |
-|-------------|-----|------------|---------|-------------|
-| GET | `/api/books/` | BookListView | List all books | AllowAny |
-| GET | `/api/books/<id>/` | BookDetailView | Get specific book | AllowAny |
-| POST | `/api/books/create/` | BookCreateView | Create new book | IsAuthenticated |
-| PUT/PATCH | `/api/books/update/` | BookUpdateView | Update book | IsAuthenticated |
-| DELETE | `/api/books/delete/` | BookDeleteView | Delete book | IsOwnerOrReadOnly (staff only) |
-| GET/POST | `/api/books/list-create/` | BookListCreateView | List/Create books | IsAuthenticatedOrReadOnly |
+| HTTP Method | URL | View Class | Purpose | Permissions | Features |
+|-------------|-----|------------|---------|-------------|----------|
+| GET | `/api/books/` | BookListView | List all books | AllowAny | 🔍🔎📊 |
+| GET | `/api/books/<id>/` | BookDetailView | Get specific book | AllowAny | - |
+| POST | `/api/books/create/` | BookCreateView | Create new book | IsAuthenticated | - |
+| PUT/PATCH | `/api/books/update/` | BookUpdateView | Update book | IsAuthenticated | - |
+| DELETE | `/api/books/delete/` | BookDeleteView | Delete book | IsOwnerOrReadOnly (staff only) | - |
+| GET/POST | `/api/books/list-create/` | BookListCreateView | List/Create books | IsAuthenticatedOrReadOnly | 🔍🔎📊 |
+
+**Legend:** 🔍 Filtering | 🔎 Searching | 📊 Ordering
+
+### Advanced Query Features
+
+Both listing endpoints (`/api/books/` and `/api/books/list-create/`) support:
+
+#### 🔍 Filtering
+- **By title**: `?title__icontains=django`
+- **By author**: `?author=1` or `?author_name__icontains=rowling` 
+- **By year**: `?publication_year=2020`
+- **Year range**: `?publication_year__gte=2000` or `?publication_year__range=2000,2010`
+
+#### 🔎 Searching  
+- **Text search**: `?search=harry potter` (searches title and author name)
+
+#### 📊 Ordering
+- **By title**: `?ordering=title` (A-Z) or `?ordering=-title` (Z-A)
+- **By year**: `?ordering=publication_year` or `?ordering=-publication_year`
+- **By author**: `?ordering=author__name`
+
+#### 🎯 Combined Queries
+- `?search=python&ordering=-publication_year&publication_year__gte=2020`
 
 ## Generic Views Explained
 

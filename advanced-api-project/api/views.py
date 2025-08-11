@@ -17,12 +17,14 @@ Permission Classes Explained:
 - IsAuthenticatedOrReadOnly: Anyone can read, only authenticated users can modify
 """
 
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, filters
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from django_filters.rest_framework import DjangoFilterBackend
 from .models import Book, Author
 from .serializers import BookSerializer, AuthorSerializer
+from .filters import BookFilter
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -60,16 +62,67 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 
 class BookListView(generics.ListAPIView):
     """
-    ListView for retrieving all books.
+    Enhanced ListView for retrieving all books with filtering, searching, and ordering.
     
     HTTP Method: GET
     URL: /books/
-    Purpose: Returns a list of all books in the database
+    Purpose: Returns a filtered, searchable, and sortable list of books
     Permissions: Anyone can view (no authentication required)
+    
+    Query Parameters:
+    
+    FILTERING (DjangoFilterBackend):
+    - ?title__icontains=django (books with "django" in title)
+    - ?author=1 (books by author with ID 1) 
+    - ?author__name__icontains=rowling (books by author name containing "rowling")
+    - ?publication_year=2020 (books published in 2020)
+    - ?publication_year__gte=2000 (books published 2000 or later)
+    - ?publication_year__lte=2010 (books published 2010 or earlier)
+    - ?publication_year__range=2000,2010 (books published between 2000-2010)
+    
+    SEARCHING (SearchFilter):
+    - ?search=harry potter (searches in title and author name for "harry potter")
+    - ?search=django (searches across title and author name fields)
+    
+    ORDERING (OrderingFilter):
+    - ?ordering=title (sort by title A-Z)
+    - ?ordering=-title (sort by title Z-A) 
+    - ?ordering=publication_year (sort by year, oldest first)
+    - ?ordering=-publication_year (sort by year, newest first)
+    - ?ordering=author__name (sort by author name A-Z)
+    
+    COMBINING PARAMETERS:
+    - ?search=harry&ordering=-publication_year&author__name__icontains=rowling
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [permissions.AllowAny]  # Anyone can read
+    
+    # Configure filter backends (order matters!)
+    filter_backends = [
+        DjangoFilterBackend,    # Enables filtering with URL parameters
+        filters.SearchFilter,   # Enables text searching
+        filters.OrderingFilter, # Enables sorting/ordering
+    ]
+    
+    # Configure filtering
+    filterset_class = BookFilter  # Use our custom filter class
+    
+    # Configure searching - fields to search in
+    search_fields = [
+        'title',           # Search in book title
+        'author__name',    # Search in author name (related field)
+    ]
+    
+    # Configure ordering - fields that can be used for sorting
+    ordering_fields = [
+        'title',              # Allow ordering by title
+        'publication_year',   # Allow ordering by publication year  
+        'author__name',       # Allow ordering by author name
+    ]
+    
+    # Default ordering if no ordering is specified
+    ordering = ['title']  # Default: sort alphabetically by title
 
 
 class BookDetailView(generics.RetrieveAPIView):
@@ -232,14 +285,23 @@ class BookDeleteView(generics.DestroyAPIView):
 
 class BookListCreateView(generics.ListCreateAPIView):
     """
-    Combined ListView and CreateView for books.
+    Combined ListView and CreateView for books with advanced query capabilities.
     Demonstrates IsAuthenticatedOrReadOnly permission.
     
     HTTP Methods: GET (list), POST (create)
     URL: /books/list-create/
     Purpose: List books (anyone) and create books (authenticated users only)
     Permissions: IsAuthenticatedOrReadOnly - Read for anyone, write for authenticated users
+    
+    This view includes the same filtering, searching, and ordering capabilities as BookListView.
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]  # Read for anyone, write for authenticated
+    
+    # Same filtering, searching, and ordering capabilities
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_class = BookFilter
+    search_fields = ['title', 'author__name']
+    ordering_fields = ['title', 'publication_year', 'author__name']
+    ordering = ['title']

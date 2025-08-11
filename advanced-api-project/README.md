@@ -31,6 +31,7 @@ advanced-api-project/
 | POST | `/api/books/create/` | BookCreateView | Create new book | IsAuthenticated |
 | PUT/PATCH | `/api/books/update/` | BookUpdateView | Update book | IsAuthenticated |
 | DELETE | `/api/books/delete/` | BookDeleteView | Delete book | IsOwnerOrReadOnly (staff only) |
+| GET/POST | `/api/books/list-create/` | BookListCreateView | List/Create books | IsAuthenticatedOrReadOnly |
 
 ## Generic Views Explained
 
@@ -84,6 +85,19 @@ A custom permission class that implements the following logic:
 - **Read Access**: Anyone can perform GET requests
 - **Write Access**: Only authenticated users can create
 - **Modify/Delete**: Only staff users can update/delete
+
+### Built-in DRF Permission Classes Used
+
+1. **AllowAny**: No restrictions - anyone can access
+2. **IsAuthenticated**: Only authenticated (logged-in) users can access
+3. **IsAuthenticatedOrReadOnly**: 
+   - Read operations (GET): Available to anyone
+   - Write operations (POST, PUT, PATCH, DELETE): Only authenticated users
+
+### BookListCreateView - Demonstrating IsAuthenticatedOrReadOnly
+A combined view that demonstrates the `IsAuthenticatedOrReadOnly` permission:
+- **GET /api/books/list-create/**: Anyone can list books
+- **POST /api/books/list-create/**: Only authenticated users can create books
 
 ```python
 class IsOwnerOrReadOnly(permissions.BasePermission):

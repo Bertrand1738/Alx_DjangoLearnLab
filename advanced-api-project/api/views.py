@@ -136,19 +136,35 @@ class BookUpdateView(generics.UpdateAPIView):
     UpdateView for modifying an existing book.
     
     HTTP Method: PUT (full update) or PATCH (partial update)
-    URL: /books/<int:pk>/update/
+    URL: /books/update/
     Purpose: Updates an existing book
     Permissions: Only authenticated users can update
+    Note: Book ID should be provided in the request data
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [permissions.IsAuthenticated]  # Must be logged in
     
+    def get_object(self):
+        """
+        Override get_object to get book by ID from request data instead of URL
+        """
+        book_id = self.request.data.get('id')
+        if not book_id:
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError({"id": "Book ID is required in request data."})
+        
+        try:
+            return Book.objects.get(id=book_id)
+        except Book.DoesNotExist:
+            from rest_framework.exceptions import NotFound
+            raise NotFound("Book not found.")
+    
     def update(self, request, *args, **kwargs):
         """
         Override update method to add custom logic.
         """
-        # Get the book instance
+        # Get the book instance using our custom get_object method
         instance = self.get_object()
         
         # Check if trying to update publication_year to future
@@ -176,13 +192,29 @@ class BookDeleteView(generics.DestroyAPIView):
     DeleteView for removing a book.
     
     HTTP Method: DELETE
-    URL: /books/<int:pk>/delete/
+    URL: /books/delete/
     Purpose: Deletes a book from the database
     Permissions: Only staff users can delete (using custom permission)
+    Note: Book ID should be provided in the request data
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [IsOwnerOrReadOnly]  # Custom permission
+    
+    def get_object(self):
+        """
+        Override get_object to get book by ID from request data instead of URL
+        """
+        book_id = self.request.data.get('id')
+        if not book_id:
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError({"id": "Book ID is required in request data."})
+        
+        try:
+            return Book.objects.get(id=book_id)
+        except Book.DoesNotExist:
+            from rest_framework.exceptions import NotFound
+            raise NotFound("Book not found.")
     
     def destroy(self, request, *args, **kwargs):
         """

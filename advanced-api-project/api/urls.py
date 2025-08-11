@@ -8,8 +8,8 @@ URL Structure:
 - /books/ -> List all books (GET)
 - /books/<id>/ -> Get specific book details (GET)  
 - /books/create/ -> Create new book (POST)
-- /books/<id>/update/ -> Update existing book (PUT/PATCH)
-- /books/<id>/delete/ -> Delete book (DELETE)
+- /books/update/ -> Update existing book (PUT/PATCH) - requires book ID in request body
+- /books/delete/ -> Delete book (DELETE) - requires book ID in request body
 """
 
 from django.urls import path
@@ -26,11 +26,11 @@ urlpatterns = [
     # CreateView: POST /books/create/ - create new book
     path('books/create/', views.BookCreateView.as_view(), name='book-create'),
     
-    # UpdateView: PUT/PATCH /books/<id>/update/ - update existing book
-    path('books/<int:pk>/update/', views.BookUpdateView.as_view(), name='book-update'),
+    # UpdateView: PUT/PATCH /books/update/ - update existing book
+    path('books/update/', views.BookUpdateView.as_view(), name='book-update'),
     
-    # DeleteView: DELETE /books/<id>/delete/ - delete book
-    path('books/<int:pk>/delete/', views.BookDeleteView.as_view(), name='book-delete'),
+    # DeleteView: DELETE /books/delete/ - delete book
+    path('books/delete/', views.BookDeleteView.as_view(), name='book-delete'),
 ]
 
 """

@@ -29,8 +29,8 @@ advanced-api-project/
 | GET | `/api/books/` | BookListView | List all books | AllowAny |
 | GET | `/api/books/<id>/` | BookDetailView | Get specific book | AllowAny |
 | POST | `/api/books/create/` | BookCreateView | Create new book | IsAuthenticated |
-| PUT/PATCH | `/api/books/<id>/update/` | BookUpdateView | Update book | IsAuthenticated |
-| DELETE | `/api/books/<id>/delete/` | BookDeleteView | Delete book | IsOwnerOrReadOnly (staff only) |
+| PUT/PATCH | `/api/books/update/` | BookUpdateView | Update book | IsAuthenticated |
+| DELETE | `/api/books/delete/` | BookDeleteView | Delete book | IsOwnerOrReadOnly (staff only) |
 
 ## Generic Views Explained
 
@@ -61,8 +61,9 @@ advanced-api-project/
 ### 4. UpdateView (BookUpdateView)
 - **Purpose**: Update an existing book
 - **HTTP Methods**: PUT (full update), PATCH (partial update)
-- **URL**: `/api/books/<int:pk>/update/`
+- **URL**: `/api/books/update/`
 - **Permissions**: Only authenticated users
+- **Note**: Book ID must be provided in request body
 - **Custom Features**:
   - Prevents updating publication_year to future dates
   - Returns custom success message
@@ -70,8 +71,9 @@ advanced-api-project/
 ### 5. DeleteView (BookDeleteView)
 - **Purpose**: Delete a book from database
 - **HTTP Method**: DELETE
-- **URL**: `/api/books/<int:pk>/delete/`
+- **URL**: `/api/books/delete/`
 - **Permissions**: Custom permission (IsOwnerOrReadOnly - staff only)
+- **Note**: Book ID must be provided in request body
 - **Custom Features**:
   - Returns confirmation message with deleted book title
 
@@ -128,6 +130,16 @@ curl http://localhost:8000/api/books/1/
 curl -X POST http://localhost:8000/api/books/create/ \
   -H "Content-Type: application/json" \
   -d '{"title": "New Book", "publication_year": 2023, "author": 1}'
+
+# Update existing book (requires authentication and book ID in body)
+curl -X PUT http://localhost:8000/api/books/update/ \
+  -H "Content-Type: application/json" \
+  -d '{"id": 1, "title": "Updated Book", "publication_year": 2024, "author": 1}'
+
+# Delete book (requires staff permissions and book ID in body)
+curl -X DELETE http://localhost:8000/api/books/delete/ \
+  -H "Content-Type: application/json" \
+  -d '{"id": 1}'
 ```
 
 ### 3. Using Postman

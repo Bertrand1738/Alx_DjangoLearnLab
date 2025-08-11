@@ -31,6 +31,9 @@ urlpatterns = [
     
     # DeleteView: DELETE /books/delete/ - delete book
     path('books/delete/', views.BookDeleteView.as_view(), name='book-delete'),
+    
+    # Combined ListView and CreateView with IsAuthenticatedOrReadOnly permission
+    path('books/list-create/', views.BookListCreateView.as_view(), name='book-list-create'),
 ]
 
 """

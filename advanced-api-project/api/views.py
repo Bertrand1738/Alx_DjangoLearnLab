@@ -18,6 +18,7 @@ Permission Classes Explained:
 """
 
 from rest_framework import generics, permissions
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Book, Author
@@ -96,7 +97,7 @@ class BookCreateView(generics.CreateAPIView):
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.IsAuthenticated]  # Must be logged in
+    permission_classes = [IsAuthenticated]  # Must be logged in
     
     def perform_create(self, serializer):
         """
@@ -143,7 +144,7 @@ class BookUpdateView(generics.UpdateAPIView):
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.IsAuthenticated]  # Must be logged in
+    permission_classes = [IsAuthenticated]  # Must be logged in
     
     def get_object(self):
         """
@@ -227,3 +228,18 @@ class BookDeleteView(generics.DestroyAPIView):
         return Response({
             'message': f'Book "{book_title}" was deleted successfully!'
         }, status=status.HTTP_200_OK)
+
+
+class BookListCreateView(generics.ListCreateAPIView):
+    """
+    Combined ListView and CreateView for books.
+    Demonstrates IsAuthenticatedOrReadOnly permission.
+    
+    HTTP Methods: GET (list), POST (create)
+    URL: /books/list-create/
+    Purpose: List books (anyone) and create books (authenticated users only)
+    Permissions: IsAuthenticatedOrReadOnly - Read for anyone, write for authenticated users
+    """
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]  # Read for anyone, write for authenticated

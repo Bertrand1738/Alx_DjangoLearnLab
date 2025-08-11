@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -81,6 +82,28 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# Test Database Configuration
+# Configure a separate test database to avoid impacting production or development data
+if 'test' in sys.argv or 'test_coverage' in sys.argv:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',  # In-memory database for faster testing
+        'TEST': {
+            'NAME': ':memory:',
+        },
+    }
+
+# Alternative test database configuration (uncomment if you prefer file-based test DB)
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3', 
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#         'TEST': {
+#             'NAME': BASE_DIR / 'test_db.sqlite3',  # Separate test database file
+#         },
+#     }
+# }
 
 
 # Password validation

@@ -7,10 +7,19 @@ This file contains tests for all Book API endpoints including:
 - Permission and authentication testing
 - Edge cases and error handling
 
+Test Database Configuration:
+Django automatically uses a separate test database to avoid impacting
+production or development data. The test database is created before
+tests run and destroyed after completion.
+
 Test Structure:
 - SetUp: Create test data before each test
 - Test Methods: Individual test cases for specific functionality
 - TearDown: Clean up after tests (handled automatically by Django)
+
+Authentication Methods:
+- self.client.login(): Django's built-in authentication for session-based auth
+- self.client.force_authenticate(): DRF's authentication for API testing
 """
 
 from django.test import TestCase
@@ -144,7 +153,11 @@ class BookAPITestCase(APITestCase):
         - Return the created book data
         - Actually create the book in database
         """
-        # Authenticate as regular user
+        # Authenticate as regular user using Django's built-in login
+        login_successful = self.client.login(username='testuser', password='testpass123')
+        self.assertTrue(login_successful)
+        
+        # Also use force_authenticate for API testing
         self.client.force_authenticate(user=self.regular_user)
         
         book_data = {
@@ -220,6 +233,8 @@ class BookAPITestCase(APITestCase):
         - Return success message and updated data
         - Actually update the book in database
         """
+        # Authenticate using Django's login method
+        self.client.login(username='testuser', password='testpass123')
         self.client.force_authenticate(user=self.regular_user)
         
         update_data = {
@@ -251,6 +266,8 @@ class BookAPITestCase(APITestCase):
         - Return status code 400
         - Return appropriate error message
         """
+        # Login user first
+        self.client.login(username='testuser', password='testpass123')
         self.client.force_authenticate(user=self.regular_user)
         
         update_data = {
@@ -273,6 +290,8 @@ class BookAPITestCase(APITestCase):
         - Return success message with book title
         - Actually remove book from database
         """
+        # Login as staff user using Django's login method
+        self.client.login(username='staffuser', password='staffpass123')
         self.client.force_authenticate(user=self.staff_user)
         
         delete_data = {'id': self.book1.id}
@@ -299,6 +318,8 @@ class BookAPITestCase(APITestCase):
         - Return status code 403 (Forbidden)
         - Not delete the book
         """
+        # Login as regular user
+        self.client.login(username='testuser', password='testpass123')
         self.client.force_authenticate(user=self.regular_user)
         
         delete_data = {'id': self.book1.id}
@@ -485,6 +506,8 @@ class BookAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         
         # Test POST with authentication (should work)
+        # Login using Django's authentication
+        self.client.login(username='testuser', password='testpass123')
         self.client.force_authenticate(user=self.regular_user)
         response = self.client.post(self.book_list_create_url, book_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -512,6 +535,8 @@ class BookAPIEdgeCasesTest(APITestCase):
         
         Should return validation errors for missing fields.
         """
+        # Login user before testing
+        self.client.login(username='testuser', password='testpass123')
         self.client.force_authenticate(user=self.user)
         
         # Missing title
@@ -529,6 +554,8 @@ class BookAPIEdgeCasesTest(APITestCase):
         
         Should return validation error.
         """
+        # Login and authenticate user
+        self.client.login(username='testuser', password='testpass123')
         self.client.force_authenticate(user=self.user)
         
         book_data = {
@@ -545,6 +572,8 @@ class BookAPIEdgeCasesTest(APITestCase):
         
         Should return 404 Not Found.
         """
+        # Login user
+        self.client.login(username='testuser', password='testpass123')
         self.client.force_authenticate(user=self.user)
         
         update_data = {

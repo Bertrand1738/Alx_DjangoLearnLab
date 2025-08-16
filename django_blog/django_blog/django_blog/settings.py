@@ -59,7 +59,6 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -78,10 +77,13 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+<<<<<<< HEAD:django_blog/settings.py
         'USER': '',
         'PASSWORD': '',
         'HOST': '',
         'PORT': '',
+=======
+>>>>>>> 0bdc2cdef0d46837c68245d07d30324128914eb3:django_blog/django_blog/django_blog/settings.py
     }
 }
 

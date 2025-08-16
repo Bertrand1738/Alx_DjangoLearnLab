@@ -1,4 +1,5 @@
 """ListView, DetailView, CreateView, UpdateView, DeleteView"""
+
 # ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 # CRUD operations implemented: ListView, DetailView, CreateView, UpdateView, DeleteView

@@ -14,3 +14,15 @@ This project implements a blog system with full CRUD operations.
 - Anyone can view list & detail pages
 - Only logged-in users can create posts
 - Only authors can edit or delete their own posts
+
+## Comment System
+
+### Features
+- Users can view all comments on a post
+- Logged-in users can add comments
+- Authors can edit or delete their own comments
+
+### Permissions
+- Guests can only view comments
+- Only logged-in users can post
+- Only the comment's author can edit or delete their own comment

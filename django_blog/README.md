@@ -26,3 +26,15 @@ This project implements a blog system with full CRUD operations.
 - Guests can only view comments
 - Only logged-in users can post
 - Only the comment's author can edit or delete their own comment
+
+## Tagging & Search Features
+
+### Tags
+- Posts can have multiple tags
+- Tags are displayed on each post
+- Clicking a tag filters posts with that tag
+
+### Search
+- Search bar available in navigation
+- Searches across post **title**, **content**, and **tags**
+- Results displayed on `/search/`

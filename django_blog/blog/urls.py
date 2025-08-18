@@ -4,7 +4,14 @@ from .views import (
     PostListView, PostDetailView, PostCreateView, 
     PostUpdateView, PostDeleteView,
     CommentCreateView, CommentUpdateView, CommentDeleteView,
-    register, profile, post_detail
+    register, profile, post_detail, search_posts, posts_by_tag
+)ngo.urls import path
+from django.contrib.auth import views as auth_views
+from .views import (
+    PostListView, PostDetailView, PostCreateView, 
+    PostUpdateView, PostDeleteView,
+    CommentCreateView, CommentUpdateView, CommentDeleteView,
+    register, profile, post_detail, search_posts
 )
 
 urlpatterns = [
@@ -19,6 +26,10 @@ urlpatterns = [
     path('post/<int:pk>/comments/new/', CommentCreateView.as_view(), name='comment-create'),
     path('comment/<int:pk>/update/', CommentUpdateView.as_view(), name='comment-update'),
     path('comment/<int:pk>/delete/', CommentDeleteView.as_view(), name='comment-delete'),
+
+    # Search and Tags URLs
+    path('search/', search_posts, name='search-posts'),
+    path('tags/<slug:tag_slug>/', posts_by_tag, name='posts-by-tag'),
 
     # Auth URLs
     path('register/', register, name='register'),

@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy, reverse
+from django.db.models import Q
+from taggit.models import Tag
 from .models import Post, Comment
 from .forms import UserRegistrationForm, UserUpdateForm, PostForm, CommentForm
 
@@ -144,3 +146,21 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
+
+
+def search_posts(request):
+    query = request.GET.get('q')
+    results = []
+    if query:
+        results = Post.objects.filter(
+            Q(title__icontains=query) |
+            Q(content__icontains=query) |
+            Q(tags__name__icontains=query)
+        ).distinct()
+    return render(request, "blog/search_results.html", {"results": results, "query": query})
+
+
+def posts_by_tag(request, tag_slug):
+    tag = get_object_or_404(Tag, slug=tag_slug)
+    posts = Post.objects.filter(tags__in=[tag])
+    return render(request, "blog/posts_by_tag.html", {"tag": tag, "posts": posts})

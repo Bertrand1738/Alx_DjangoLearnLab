@@ -6,6 +6,7 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserSerializer
 from .models import CustomUser
+from rest_framework import permissions
 
 User = get_user_model()
 

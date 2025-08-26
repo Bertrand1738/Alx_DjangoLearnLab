@@ -5,7 +5,6 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
 from notifications.models import Notification
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -26,7 +25,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def like(self, request, pk=None):
-        post = get_object_or_404(Post, pk=pk)
+        post = generics.get_object_or_404(Post, pk=pk)
         # Use get_or_create to prevent duplicate likes
         like, created = Like.objects.get_or_create(user=request.user, post=post)
         
@@ -47,7 +46,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def unlike(self, request, pk=None):
-        post = get_object_or_404(Post, pk=pk)
+        post = generics.get_object_or_404(Post, pk=pk)
         like = Like.objects.filter(user=request.user, post=post).first()
         
         if not like:

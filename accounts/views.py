@@ -16,7 +16,8 @@ class RegisterView(generics.CreateAPIView):
 		serializer = self.get_serializer(data=request.data)
 		serializer.is_valid(raise_exception=True)
 		user = serializer.save()
-		token, created = Token.objects.get_or_create(user=user)
+		# Token is already created in the serializer
+		token = Token.objects.get(user=user)
 		return Response({
 			'user': UserSerializer(user).data,
 			'token': token.key
@@ -26,11 +27,10 @@ class LoginView(APIView):
 	def post(self, request):
 		serializer = UserLoginSerializer(data=request.data)
 		serializer.is_valid(raise_exception=True)
-		user = serializer.validated_data
-		token, created = Token.objects.get_or_create(user=user)
+		data = serializer.validated_data
 		return Response({
-			'user': UserSerializer(user).data,
-			'token': token.key
+			'user': UserSerializer(data['user']).data,
+			'token': data['token']
 		}, status=status.HTTP_200_OK)
 
 class UserDetailView(generics.RetrieveAPIView):

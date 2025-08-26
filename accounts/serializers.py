@@ -18,16 +18,23 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             bio=validated_data.get('bio', ''),
             profile_picture=validated_data.get('profile_picture', None)
         )
+        # Create token for the new user
+        Token.objects.create(user=user)
         return user
 
 class UserLoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
+    token = serializers.CharField(read_only=True)
 
     def validate(self, data):
         user = authenticate(username=data['username'], password=data['password'])
         if user and user.is_active:
-            return user
+            # Get or create token
+            token, created = Token.objects.get_or_create(user=user)
+            data['token'] = token.key
+            data['user'] = user
+            return data
         raise serializers.ValidationError('Invalid credentials')
 
 class UserSerializer(serializers.ModelSerializer):

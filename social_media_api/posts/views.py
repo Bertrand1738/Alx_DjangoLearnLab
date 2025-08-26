@@ -1,10 +1,11 @@
-from rest_framework import viewsets, permissions, filters, status
+from rest_framework import viewsets, permissions, filters, status, generics
 from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 from notifications.models import Notification
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -25,22 +26,19 @@ class PostViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def like(self, request, pk=None):
-        post = self.get_object()
-        user = request.user
+        post = get_object_or_404(Post, pk=pk)
+        # Use get_or_create to prevent duplicate likes
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
         
-        # Check if user already liked the post
-        if post.likes.filter(user=user).exists():
+        if not created:
             return Response({'detail': 'You have already liked this post.'}, 
                           status=status.HTTP_400_BAD_REQUEST)
         
-        # Create like
-        Like.objects.create(user=user, post=post)
-        
         # Create notification
-        if post.author != user:  # Don't notify if user likes their own post
+        if post.author != request.user:  # Don't notify if user likes their own post
             Notification.objects.create(
                 recipient=post.author,
-                actor=user,
+                actor=request.user,
                 verb='liked',
                 target=post
             )
@@ -49,9 +47,8 @@ class PostViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def unlike(self, request, pk=None):
-        post = self.get_object()
-        user = request.user
-        like = post.likes.filter(user=user).first()
+        post = get_object_or_404(Post, pk=pk)
+        like = Like.objects.filter(user=request.user, post=post).first()
         
         if not like:
             return Response({'detail': 'You have not liked this post.'}, 

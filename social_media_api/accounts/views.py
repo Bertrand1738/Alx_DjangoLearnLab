@@ -1,12 +1,11 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import permissions
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserSerializer
 from .models import CustomUser
-from rest_framework import permissions
 
 User = get_user_model()
 
@@ -40,7 +39,7 @@ class UserDetailView(generics.RetrieveAPIView):
 	serializer_class = UserSerializer
 
 class ProfileView(APIView):
-	permission_classes = [IsAuthenticated]
+	permission_classes = ["permissions.IsAuthenticated"]
 
 	def get(self, request):
 		user = request.user
@@ -55,7 +54,7 @@ class ProfileView(APIView):
 		return Response(serializer.data)
 
 class FollowUserView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = ["permissions.IsAuthenticated"]
     queryset = CustomUser.objects.all()
 
     def post(self, request, user_id):
@@ -69,7 +68,7 @@ class FollowUserView(generics.GenericAPIView):
         return Response({'success': f'You are now following {to_follow.username}.'})
 
 class UnfollowUserView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = ["permissions.IsAuthenticated"]
     queryset = CustomUser.objects.all()
 
     def post(self, request, user_id):

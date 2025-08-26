@@ -6,13 +6,14 @@ import sys
 
 def main():
     """Run administrative tasks."""
-<<<<<<< HEAD
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'social_media_api.settings')
-=======
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_blog.settings')
->>>>>>> abacb1d76f0775afded1fee1488f7046a94344ed
+    # Temporarily disable URL checking for migrations
+    os.environ.setdefault('DJANGO_ALLOW_ASYNC_UNSAFE', 'true')
     try:
         from django.core.management import execute_from_command_line
+        if 'makemigrations' in sys.argv or 'migrate' in sys.argv:
+            from django.conf import settings
+            settings.ROOT_URLCONF = None
     except ImportError as exc:
         raise ImportError(
             "Couldn't import Django. Are you sure it's installed and "

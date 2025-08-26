@@ -4,7 +4,10 @@ __pycache__/
 *$py.class
 *.so
 .Python
+<<<<<<< HEAD
 env/
+=======
+>>>>>>> abacb1d76f0775afded1fee1488f7046a94344ed
 build/
 develop-eggs/
 dist/
@@ -16,6 +19,7 @@ lib64/
 parts/
 sdist/
 var/
+<<<<<<< HEAD
 *.egg-info/
 .installed.cfg
 *.egg
@@ -49,4 +53,36 @@ env/
 .Spotlight-V100
 .Trashes
 ehthumbs.db
+=======
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# Virtual Environment
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+>>>>>>> abacb1d76f0775afded1fee1488f7046a94344ed
 Thumbs.db

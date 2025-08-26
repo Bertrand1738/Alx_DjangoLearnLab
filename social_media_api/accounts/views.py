@@ -52,12 +52,13 @@ class ProfileView(APIView):
 		serializer.save()
 		return Response(serializer.data)
 
-class FollowUserView(APIView):
+class FollowUserView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    queryset = User.objects.all()
 
     def post(self, request, user_id):
         try:
-            to_follow = User.objects.get(id=user_id)
+            to_follow = self.get_queryset().get(id=user_id)
         except User.DoesNotExist:
             return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
         if to_follow == request.user:
@@ -65,12 +66,13 @@ class FollowUserView(APIView):
         request.user.followers.add(to_follow)
         return Response({'success': f'You are now following {to_follow.username}.'})
 
-class UnfollowUserView(APIView):
+class UnfollowUserView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    queryset = User.objects.all()
 
     def post(self, request, user_id):
         try:
-            to_unfollow = User.objects.get(id=user_id)
+            to_unfollow = self.get_queryset().get(id=user_id)
         except User.DoesNotExist:
             return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
         request.user.followers.remove(to_unfollow)

@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework import permissions
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
+from notifications.models import Notification
 from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserSerializer
 from .models import CustomUser
 
@@ -39,7 +40,7 @@ class UserDetailView(generics.RetrieveAPIView):
 	serializer_class = UserSerializer
 
 class ProfileView(APIView):
-	permission_classes = ["permissions.IsAuthenticated"]
+	permission_classes = [permissions.IsAuthenticated]
 
 	def get(self, request):
 		user = request.user
@@ -54,7 +55,7 @@ class ProfileView(APIView):
 		return Response(serializer.data)
 
 class FollowUserView(generics.GenericAPIView):
-    permission_classes = ["permissions.IsAuthenticated"]
+    permission_classes = [permissions.IsAuthenticated]
     queryset = CustomUser.objects.all()
 
     def post(self, request, user_id):
@@ -65,10 +66,17 @@ class FollowUserView(generics.GenericAPIView):
         if to_follow == request.user:
             return Response({'error': 'You cannot follow yourself.'}, status=status.HTTP_400_BAD_REQUEST)
         request.user.followers.add(to_follow)
+        # Create notification for the user being followed
+        Notification.objects.create(
+            recipient=to_follow,
+            actor=request.user,
+            verb='started following',
+            target=to_follow
+        )
         return Response({'success': f'You are now following {to_follow.username}.'})
 
 class UnfollowUserView(generics.GenericAPIView):
-    permission_classes = ["permissions.IsAuthenticated"]
+    permission_classes = [permissions.IsAuthenticated]
     queryset = CustomUser.objects.all()
 
     def post(self, request, user_id):

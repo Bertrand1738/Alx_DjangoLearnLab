@@ -1,0 +1,1 @@
+web: gunicorn --config gunicorn.conf.py social_media_api.wsgi:application
